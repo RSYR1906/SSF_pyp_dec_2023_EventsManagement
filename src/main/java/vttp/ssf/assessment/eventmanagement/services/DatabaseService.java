@@ -12,6 +12,7 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
 import jakarta.json.JsonValue;
+import vttp.ssf.assessment.eventmanagement.constant.Constants;
 import vttp.ssf.assessment.eventmanagement.models.Event;
 
 @Service
@@ -21,7 +22,7 @@ public class DatabaseService {
 
     public List<Event> readFile(String fileName) throws FileNotFoundException {
 
-        FileInputStream fis = new FileInputStream(fileName);
+        FileInputStream fis = new FileInputStream(Constants.fileName);
         JsonReader jReader = Json.createReader(fis);
         JsonArray jArray = jReader.readArray();
 

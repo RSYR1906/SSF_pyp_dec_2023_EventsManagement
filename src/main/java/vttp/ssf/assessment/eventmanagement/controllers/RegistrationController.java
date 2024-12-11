@@ -61,17 +61,20 @@ public class RegistrationController {
             return "ErrorRegistration"; // Return to form with error
         }
 
-        // Update the participants count in the event
-        redisRepository.updateParticipants(eventId, user.getTicketAmount());
-        Event eventUpdated = redisRepository.getEventById(eventId);
-        if (eventUpdated.getParticipants() > eventUpdated.getEventSize()) {
-            model.addAttribute("event", eventUpdated);
-            model.addAttribute("errorMessage", "Your request for tickets exceeded the event size.");
-            return "ErrorRegistration";
-        }
+        try {
+            // Update the participants count in the event
+            redisRepository.updateParticipants(eventId, user.getTicketAmount());
+            Event eventUpdated = redisRepository.getEventById(eventId);
 
-        // Redirect to success page
-        model.addAttribute("event", eventUpdated);
-        return "success"; // Render success page
+            // Redirect to success page
+            model.addAttribute("event", eventUpdated);
+            return "success"; // Render success page
+        } catch (IllegalArgumentException e) {
+            // Handle the error when participants exceed the event size
+            Event event = redisRepository.getEventById(eventId);
+            model.addAttribute("event", event);
+            model.addAttribute("errorMessage", e.getMessage());
+            return "ErrorRegistration"; // Redirect to error page
+        }
     }
 }

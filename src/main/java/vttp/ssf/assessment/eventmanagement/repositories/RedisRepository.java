@@ -125,16 +125,20 @@ public class RedisRepository {
 				Event event = objectMapper.readValue(eventJson.toString(), Event.class);
 
 				// Find the event by ID
-				if (event.getEventId().equals(eventId) && event.getParticipants() < event.getEventSize()) {
+				if (event.getEventId().equals(eventId)) {
+					int totalParticipants = event.getParticipants() + ticketsRequested;
 
-					// Increment the participants count
-					event.setParticipants(event.getParticipants() + ticketsRequested);
+					if (totalParticipants <= event.getEventSize()) {
+						// Increment the participants count
+						event.setParticipants(totalParticipants);
 
-					// Replace the updated event back in Redis
-					String updatedEventJson = objectMapper.writeValueAsString(event);
-					template.opsForList().set("eventsList", i, updatedEventJson);
-					System.out.println("Updated participants for event: " + event.getEventName());
-					return;
+						// Replace the updated event back in Redis
+						String updatedEventJson = objectMapper.writeValueAsString(event);
+						template.opsForList().set("eventsList", i, updatedEventJson);
+						System.out.println("Updated participants for event: " + event.getEventName());
+						return;
+					}
+					throw new IllegalArgumentException("Requested tickets exceed the event size!");
 				}
 			}
 		}
